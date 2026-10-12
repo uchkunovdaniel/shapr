@@ -1,0 +1,1420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Primitive. Pictures, rebuilt from shapes.</title>
+    <style>
+      :root {
+        --bg: #fbfbfd;
+        --card: #fff;
+        --tx: #1d1d1f;
+        --mu: #86868b;
+        --ln: rgba(0, 0, 0, 0.1);
+        --bl: #0066cc;
+        --btn: #0071e3;
+        --glass: rgba(251, 251, 253, 0.74);
+        --sh: 0 30px 80px rgba(0, 0, 0, 0.16);
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #000;
+          --card: #161617;
+          --tx: #f5f5f7;
+          --ln: rgba(255, 255, 255, 0.14);
+          --bl: #2997ff;
+          --btn: #0a84ff;
+          --glass: rgba(0, 0, 0, 0.72);
+          --sh: 0 30px 80px rgba(0, 0, 0, 0.6);
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #000;
+        --card: #161617;
+        --tx: #f5f5f7;
+        --ln: rgba(255, 255, 255, 0.14);
+        --bl: #2997ff;
+        --btn: #0a84ff;
+        --glass: rgba(0, 0, 0, 0.72);
+        --sh: 0 30px 80px rgba(0, 0, 0, 0.6);
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: calc(60px + env(safe-area-inset-top, 0px));
+        -webkit-text-size-adjust: 100%;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--tx);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "Helvetica Neue", Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.47;
+      }
+      nav {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 10;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 max(20px, calc((100% - 1040px) / 2));
+        background: var(--glass);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid var(--ln);
+        font-size: 13px;
+      }
+      nav b {
+        font-size: 16px;
+        letter-spacing: -0.02em;
+      }
+      nav div {
+        display: flex;
+        gap: 24px;
+      }
+      nav a {
+        color: var(--tx);
+        text-decoration: none;
+        opacity: 0.8;
+      }
+      nav a:hover {
+        opacity: 1;
+      }
+      .hero {
+        text-align: center;
+        padding: 96px 20px 56px;
+      }
+      h1 {
+        font-size: clamp(44px, 10vw, 104px);
+        font-weight: 800;
+        letter-spacing: -0.045em;
+        line-height: 1.02;
+        margin: 0 auto;
+        max-width: 960px;
+      }
+      .sub {
+        font-size: clamp(19px, 2.6vw, 28px);
+        color: var(--mu);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        margin: 22px auto 0;
+        max-width: 620px;
+      }
+      .cta {
+        margin-top: 32px;
+        display: flex;
+        gap: 22px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .pill {
+        appearance: none;
+        border: 0;
+        background: var(--btn);
+        color: #fff;
+        font: inherit;
+        font-size: 17px;
+        padding: 12px 26px;
+        border-radius: 980px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.3s ease;
+      }
+      .pill:hover {
+        opacity: 0.85;
+      }
+      .lnk {
+        color: var(--bl);
+        font-size: 19px;
+        text-decoration: none;
+      }
+      .lnk:hover {
+        text-decoration: underline;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      #frame {
+        position: relative;
+        border-radius: 28px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: var(--sh);
+        aspect-ratio: 4/3;
+        width: 100%;
+      }
+      #frame canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #ov,
+      #org {
+        position: absolute;
+        inset: 0;
+      }
+      #org {
+        clip-path: inset(0 100% 0 0);
+        pointer-events: none;
+      }
+      #ov {
+        pointer-events: none;
+        touch-action: none;
+      }
+      #ov.on {
+        pointer-events: auto;
+        cursor: crosshair;
+      }
+      #vid {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1);
+        background: #000;
+      }
+      #vid[hidden] {
+        display: none;
+      }
+      .panel {
+        margin-top: 20px;
+        background: var(--card);
+        border: 1px solid var(--ln);
+        border-radius: 28px;
+        padding: 22px;
+        display: grid;
+        gap: 18px;
+      }
+      .stats {
+        display: flex;
+        gap: 32px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .stats div {
+        font-size: 13px;
+        color: var(--mu);
+      }
+      .stats strong {
+        display: block;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--tx);
+        font-variant-numeric: tabular-nums;
+      }
+      .seg {
+        display: inline-flex;
+        background: var(--bg);
+        border: 1px solid var(--ln);
+        border-radius: 12px;
+        padding: 3px;
+        flex-wrap: wrap;
+      }
+      .seg button {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: var(--tx);
+        font: inherit;
+        font-size: 14px;
+        padding: 7px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--card);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+        font-weight: 600;
+      }
+      .sliders {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+      }
+      .sliders label {
+        font-size: 13px;
+        color: var(--mu);
+        display: grid;
+        gap: 6px;
+      }
+      .sliders label span {
+        display: flex;
+        justify-content: space-between;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--btn);
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--ln);
+        background: var(--bg);
+        color: var(--tx);
+        font: inherit;
+        font-size: 14px;
+        padding: 9px 18px;
+        border-radius: 980px;
+        cursor: pointer;
+        transition:
+          background 0.3s ease,
+          opacity 0.3s ease;
+      }
+      .btn:hover {
+        opacity: 0.7;
+      }
+      .btn.main {
+        background: var(--btn);
+        border-color: transparent;
+        color: #fff;
+        font-weight: 600;
+        min-width: 96px;
+      }
+      .btn[aria-pressed="true"] {
+        background: var(--bl);
+        border-color: transparent;
+        color: #fff;
+      }
+      .sp {
+        flex: 1;
+      }
+      .hint {
+        font-size: 13px;
+        color: var(--mu);
+        margin: 0;
+        min-height: 20px;
+      }
+      section.how {
+        padding: 120px 0 40px;
+      }
+      h2 {
+        font-size: clamp(34px, 6vw, 64px);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        margin: 0 0 14px;
+        text-align: center;
+      }
+      .lead {
+        text-align: center;
+        color: var(--mu);
+        font-size: 21px;
+        margin: 0 auto 56px;
+        max-width: 560px;
+      }
+      .bento {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--ln);
+        border-radius: 28px;
+        padding: 40px;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      .card.wide {
+        grid-column: 1/-1;
+        min-height: 240px;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+      }
+      .card small {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--bl);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+      .card h3 {
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 1.08;
+        margin: 8px 0 12px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--mu);
+        font-size: 18px;
+        max-width: 440px;
+      }
+      .card.wide p {
+        margin: 0 auto;
+      }
+      footer {
+        padding: 80px 20px 60px;
+        text-align: center;
+        color: var(--mu);
+        font-size: 13px;
+      }
+      footer a {
+        color: var(--bl);
+        text-decoration: none;
+      }
+      .js .rv {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 1s ease,
+          transform 1s ease;
+      }
+      .js .rv.in {
+        opacity: 1;
+        transform: none;
+      }
+      @media (max-width: 720px) {
+        .bento {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 28px;
+          min-height: 220px;
+        }
+        .hero {
+          padding-top: 64px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .js .rv {
+          transition: none;
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <b>Primitive</b>
+    </nav>
+
+    <header class="hero">
+      <h1 class="rv">Every picture is just shapes.</h1>
+      <p class="sub rv">
+        Watch a photo rebuild itself. One shape at a time. Then tell it where to
+        look.
+      </p>
+      <div class="cta rv">
+        <a class="pill" href="#studio">Try it</a
+      </div>
+    </header>
+
+    <main class="wrap" id="studio">
+      <div id="frame" class="rv">
+        <canvas id="stage"></canvas>
+        <canvas id="org"></canvas>
+        <canvas id="ov"></canvas>
+        <video id="vid" playsinline muted hidden></video>
+      </div>
+
+      <div class="panel rv">
+        <div class="stats">
+          <div><strong id="cnt">0 / 400</strong>Shapes</div>
+          <div><strong id="mat">0%</strong>Match</div>
+        </div>
+
+        <div class="row">
+          <div class="seg" id="modes" role="group" aria-label="Shape style">
+            <button data-m="0" aria-pressed="true">Mix</button>
+            <button data-m="1" aria-pressed="false">Triangles</button>
+            <button data-m="2" aria-pressed="false">Blocks</button>
+            <button data-m="3" aria-pressed="false">Ovals</button>
+            <button data-m="4" aria-pressed="false">Dots</button>
+          </div>
+        </div>
+
+        <div class="sliders">
+          <label
+            ><span>Shapes <em id="nv" style="font-style: normal">400</em></span
+            ><input
+              type="range"
+              id="n"
+              min="50"
+              max="1500"
+              step="50"
+              value="400"
+          /></label>
+          <label
+            ><span>Reveal original</span
+            ><input type="range" id="rev" min="0" max="100" value="0"
+          /></label>
+          <label
+            ><span>Replay</span
+            ><input type="range" id="scrub" min="0" max="0" value="0"
+          /></label>
+          <label
+            ><span>Speed <em id="sv" style="font-style: normal">6</em></span
+            ><input type="range" id="spd" min="1" max="10" value="6"
+          /></label>
+        </div>
+
+        <div class="row">
+          <button class="btn main" id="go">Start</button>
+          <button class="btn" id="reset">Reset</button>
+          <span class="sp"></span>
+          <button class="btn" id="up">Upload</button>
+          <button class="btn" id="cam">Camera</button>
+          <button class="btn" id="smp">Sample</button>
+          <input type="file" id="file" accept="image/*" hidden />
+        </div>
+
+        <div class="row">
+          <button class="btn" id="focus" aria-pressed="false">
+            Focus brush
+          </button>
+          <button class="btn" id="clr">Clear focus</button>
+          <span class="sp"></span>
+          <button class="btn" id="svg">Save SVG</button>
+          <button class="btn" id="png">Save PNG</button>
+        </div>
+        <p class="hint" id="hint">
+          Tip: turn on Focus brush and paint over faces or eyes. Shapes go there
+          first.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      document.documentElement.classList.add("js");
+      (function () {
+        var $ = function (s) {
+          return document.querySelector(s);
+        };
+        var stage = $("#stage"),
+          sx = stage.getContext("2d"),
+          ov = $("#ov"),
+          ox = ov.getContext("2d"),
+          org = $("#org"),
+          vid = $("#vid"),
+          frame = $("#frame");
+        var W = 1,
+          H = 1,
+          S = 1,
+          N = 400,
+          mode = 0,
+          focusOn = false,
+          running = false,
+          dirty = true,
+          fail = 0,
+          viewK = 0,
+          painting = false;
+        var tg,
+          tl,
+          cur,
+          ce,
+          edge,
+          brush,
+          cumU,
+          cumD,
+          cumE,
+          shapes = [],
+          bg = [0, 0, 0],
+          sumE = 0,
+          rms0 = 1,
+          src = null,
+          rowA,
+          rowB,
+          ry0 = 0,
+          ry1 = 0,
+          cr = 0,
+          cg = 0,
+          cb = 0,
+          stream = null;
+        var A = 0.5,
+          L = new Float32Array(3);
+        var RATES = [0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 40, Infinity],
+          spd = 6,
+          acc = 0,
+          raf = 0;
+
+        /* ---------- colour science: CIE Lab with a linearization lookup ---------- */
+        var LIN = new Float32Array(256);
+        for (var i = 0; i < 256; i++) {
+          var c = i / 255;
+          LIN[i] =
+            c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        }
+        function fl(t) {
+          return t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+        }
+        function lab(r, g, b, out, o) {
+          var R = LIN[r],
+            G = LIN[g],
+            B = LIN[b];
+          var x = fl((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047),
+            y = fl(0.2126 * R + 0.7152 * G + 0.0722 * B),
+            z = fl((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
+          out[o] = 116 * y - 16;
+          out[o + 1] = 500 * (x - y);
+          out[o + 2] = 200 * (y - z);
+        }
+
+        /* ---------- loading an image ---------- */
+        function dims(c) {
+          return [
+            c.videoWidth || c.naturalWidth || c.width,
+            c.videoHeight || c.naturalHeight || c.height,
+          ];
+        }
+        function load(c) {
+          var d0 = dims(c),
+            sw = d0[0],
+            sh = d0[1],
+            k = Math.min(1, 1024 / Math.max(sw, sh));
+          src = document.createElement("canvas");
+          src.width = Math.round(sw * k);
+          src.height = Math.round(sh * k);
+          src.getContext("2d").drawImage(c, 0, 0, src.width, src.height);
+          var m = 150 / Math.max(sw, sh);
+          W = Math.max(8, Math.round(sw * m));
+          H = Math.max(8, Math.round(sh * m));
+          var wc = document.createElement("canvas");
+          wc.width = W;
+          wc.height = H;
+          var wx = wc.getContext("2d");
+          wx.drawImage(c, 0, 0, W, H);
+          var d = wx.getImageData(0, 0, W, H).data,
+            n = W * H;
+          tg = new Uint8ClampedArray(n * 3);
+          tl = new Float32Array(n * 3);
+          var lum = new Float32Array(n);
+          for (var p = 0; p < n; p++) {
+            var i3 = p * 3;
+            tg[i3] = d[p * 4];
+            tg[i3 + 1] = d[p * 4 + 1];
+            tg[i3 + 2] = d[p * 4 + 2];
+            lab(tg[i3], tg[i3 + 1], tg[i3 + 2], tl, i3);
+            lum[p] = tl[i3];
+          }
+          edge = new Float32Array(n);
+          var mx = 1e-6;
+          for (var y = 1; y < H - 1; y++)
+            for (var x = 1; x < W - 1; x++) {
+              var q = y * W + x;
+              var gx =
+                lum[q - W + 1] +
+                2 * lum[q + 1] +
+                lum[q + W + 1] -
+                (lum[q - W - 1] + 2 * lum[q - 1] + lum[q + W - 1]);
+              var gy =
+                lum[q + W - 1] +
+                2 * lum[q + W] +
+                lum[q + W + 1] -
+                (lum[q - W - 1] + 2 * lum[q - W] + lum[q - W + 1]);
+              var e = Math.sqrt(gx * gx + gy * gy);
+              edge[q] = e;
+              if (e > mx) mx = e;
+            }
+          for (var p2 = 0; p2 < n; p2++) edge[p2] /= mx;
+          brush = new Float32Array(n);
+          cumU = new Float64Array(n);
+          cumD = new Float64Array(n);
+          cumE = new Float64Array(n);
+          S = src.width / W;
+          [stage, ov, org].forEach(function (cv) {
+            cv.width = src.width;
+            cv.height = src.height;
+          });
+          org.getContext("2d").drawImage(src, 0, 0);
+          frame.style.aspectRatio = src.width + " / " + src.height;
+          ox.clearRect(0, 0, ov.width, ov.height);
+          rowA = new Int32Array(H);
+          rowB = new Int32Array(H);
+          reset();
+        }
+
+        function reset() {
+          running = false;
+          shapes = [];
+          fail = 0;
+          dirty = true;
+          var n = W * H,
+            r = 0,
+            g = 0,
+            b = 0,
+            p,
+            i;
+          for (p = 0; p < n; p++) {
+            r += tg[p * 3];
+            g += tg[p * 3 + 1];
+            b += tg[p * 3 + 2];
+          }
+          bg = [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
+          cur = new Uint8ClampedArray(n * 3);
+          ce = new Float32Array(n);
+          sumE = 0;
+          lab(bg[0], bg[1], bg[2], L, 0);
+          for (p = 0; p < n; p++) {
+            i = p * 3;
+            cur[i] = bg[0];
+            cur[i + 1] = bg[1];
+            cur[i + 2] = bg[2];
+            var a = L[0] - tl[i],
+              b2 = L[1] - tl[i + 1],
+              c2 = L[2] - tl[i + 2];
+            ce[p] = a * a + b2 * b2 + c2 * c2;
+            sumE += ce[p];
+          }
+          rms0 = Math.sqrt(sumE / n) || 1;
+          redraw(0);
+          ui();
+          $("#go").textContent = "Start";
+        }
+
+        /* ---------- drawing ---------- */
+        function drawShape(s) {
+          var v = s.v;
+          sx.fillStyle =
+            "rgba(" + s.c[0] + "," + s.c[1] + "," + s.c[2] + "," + A + ")";
+          sx.beginPath();
+          if (s.t === 0) {
+            sx.moveTo((v[0] + 0.5) * S, (v[1] + 0.5) * S);
+            sx.lineTo((v[2] + 0.5) * S, (v[3] + 0.5) * S);
+            sx.lineTo((v[4] + 0.5) * S, (v[5] + 0.5) * S);
+            sx.closePath();
+          } else if (s.t === 1) {
+            var x0 = Math.min(v[0], v[2]),
+              x1 = Math.max(v[0], v[2]),
+              y0 = Math.min(v[1], v[3]),
+              y1 = Math.max(v[1], v[3]);
+            sx.rect(x0 * S, y0 * S, (x1 - x0 + 1) * S, (y1 - y0 + 1) * S);
+          } else {
+            sx.ellipse(
+              (v[0] + 0.5) * S,
+              (v[1] + 0.5) * S,
+              (v[2] + 0.5) * S,
+              (v[3] + 0.5) * S,
+              0,
+              0,
+              6.2832,
+            );
+          }
+          sx.fill();
+        }
+        function redraw(k) {
+          sx.fillStyle = "rgb(" + bg[0] + "," + bg[1] + "," + bg[2] + ")";
+          sx.fillRect(0, 0, stage.width, stage.height);
+          for (var i = 0; i < k; i++) drawShape(shapes[i]);
+          viewK = k;
+        }
+
+        /* ---------- rasterizing shapes into scanlines ---------- */
+        function raster(s) {
+          var v = s.v,
+            t = s.t,
+            y;
+          if (t === 0) {
+            ry0 = Math.max(0, Math.min(v[1], v[3], v[5]));
+            ry1 = Math.min(H - 1, Math.max(v[1], v[3], v[5]));
+            if (ry0 > ry1) return false;
+            for (y = ry0; y <= ry1; y++) {
+              rowA[y] = 1e9;
+              rowB[y] = -1e9;
+            }
+            for (var e = 0; e < 3; e++) {
+              var f = e * 2,
+                g = ((e + 1) % 3) * 2,
+                ax = v[f],
+                ay = v[f + 1],
+                bx = v[g],
+                by = v[g + 1];
+              if (ay === by) {
+                if (ay >= ry0 && ay <= ry1) {
+                  rowA[ay] = Math.min(rowA[ay], ax, bx);
+                  rowB[ay] = Math.max(rowB[ay], ax, bx);
+                }
+                continue;
+              }
+              var ya = Math.max(ry0, Math.min(ay, by)),
+                yb = Math.min(ry1, Math.max(ay, by));
+              for (y = ya; y <= yb; y++) {
+                var x = Math.round(ax + ((bx - ax) * (y - ay)) / (by - ay));
+                if (x < rowA[y]) rowA[y] = x;
+                if (x > rowB[y]) rowB[y] = x;
+              }
+            }
+          } else if (t === 1) {
+            ry0 = Math.max(0, Math.min(v[1], v[3]));
+            ry1 = Math.min(H - 1, Math.max(v[1], v[3]));
+            if (ry0 > ry1) return false;
+            var xa = Math.min(v[0], v[2]),
+              xb = Math.max(v[0], v[2]);
+            for (y = ry0; y <= ry1; y++) {
+              rowA[y] = xa;
+              rowB[y] = xb;
+            }
+          } else {
+            ry0 = Math.max(0, v[1] - v[3]);
+            ry1 = Math.min(H - 1, v[1] + v[3]);
+            if (ry0 > ry1) return false;
+            for (y = ry0; y <= ry1; y++) {
+              var dy = (y - v[1]) / v[3],
+                d = 1 - dy * dy;
+              if (d < 0) {
+                rowA[y] = 1;
+                rowB[y] = 0;
+              } else {
+                var dx = Math.round(v[2] * Math.sqrt(d));
+                rowA[y] = v[0] - dx;
+                rowB[y] = v[0] + dx;
+              }
+            }
+          }
+          return true;
+        }
+
+        /* ---------- scoring: solve the best colour, then measure the Lab improvement ---------- */
+        function ev(s) {
+          if (!raster(s)) return Infinity;
+          var sr = 0,
+            sg = 0,
+            sb = 0,
+            cnt = 0,
+            ia = 1 / A,
+            y,
+            x,
+            i,
+            a,
+            b,
+            p;
+          for (y = ry0; y <= ry1; y++) {
+            a = Math.max(0, rowA[y]);
+            b = Math.min(W - 1, rowB[y]);
+            for (x = a, i = (y * W + a) * 3; x <= b; x++, i += 3) {
+              sr += (tg[i] - cur[i]) * ia + cur[i];
+              sg += (tg[i + 1] - cur[i + 1]) * ia + cur[i + 1];
+              sb += (tg[i + 2] - cur[i + 2]) * ia + cur[i + 2];
+              cnt++;
+            }
+          }
+          if (!cnt) return Infinity;
+          cr = Math.max(0, Math.min(255, Math.round(sr / cnt)));
+          cg = Math.max(0, Math.min(255, Math.round(sg / cnt)));
+          cb = Math.max(0, Math.min(255, Math.round(sb / cnt)));
+          var d = 0;
+          for (y = ry0; y <= ry1; y++) {
+            a = Math.max(0, rowA[y]);
+            b = Math.min(W - 1, rowB[y]);
+            for (x = a, p = y * W + a, i = p * 3; x <= b; x++, p++, i += 3) {
+              lab(
+                (cur[i] + (cr - cur[i]) * A + 0.5) | 0,
+                (cur[i + 1] + (cg - cur[i + 1]) * A + 0.5) | 0,
+                (cur[i + 2] + (cb - cur[i + 2]) * A + 0.5) | 0,
+                L,
+                0,
+              );
+              var q = L[0] - tl[i],
+                w = L[1] - tl[i + 1],
+                e = L[2] - tl[i + 2];
+              d += q * q + w * w + e * e - ce[p];
+            }
+          }
+          return d;
+        }
+
+        function apply(s) {
+          ev(s);
+          var y, x, i, p, a, b;
+          for (y = ry0; y <= ry1; y++) {
+            a = Math.max(0, rowA[y]);
+            b = Math.min(W - 1, rowB[y]);
+            for (x = a, p = y * W + a, i = p * 3; x <= b; x++, p++, i += 3) {
+              cur[i] = cur[i] + (cr - cur[i]) * A;
+              cur[i + 1] = cur[i + 1] + (cg - cur[i + 1]) * A;
+              cur[i + 2] = cur[i + 2] + (cb - cur[i + 2]) * A;
+              lab(cur[i], cur[i + 1], cur[i + 2], L, 0);
+              var q = L[0] - tl[i],
+                w = L[1] - tl[i + 1],
+                e = L[2] - tl[i + 2],
+                ne = q * q + w * w + e * e;
+              sumE += ne - ce[p];
+              ce[p] = ne;
+            }
+          }
+          var sh = { t: s.t, v: s.v, c: [cr, cg, cb] };
+          shapes.push(sh);
+          if (viewK === shapes.length - 1) {
+            drawShape(sh);
+            viewK++;
+          }
+        }
+
+        /* ---------- where to place shapes: error map, edge map, focus brush ---------- */
+        function cums(all) {
+          var n = W * H,
+            u = 0,
+            g = 0,
+            e = 0;
+          for (var p = 0; p < n; p++) {
+            var bw = 1 + brush[p] * 8;
+            if (all) {
+              u += bw;
+              cumU[p] = u;
+              g += (edge[p] + 0.03) * bw;
+              cumD[p] = g;
+            }
+            e += (ce[p] + 0.5) * bw;
+            cumE[p] = e;
+          }
+        }
+        function pick(c) {
+          var r = Math.random() * c[c.length - 1],
+            lo = 0,
+            hi = c.length - 1;
+          while (lo < hi) {
+            var mid = (lo + hi) >> 1;
+            if (c[mid] < r) lo = mid + 1;
+            else hi = mid;
+          }
+          return lo;
+        }
+        function rnd(mxs) {
+          var q = Math.random(),
+            idx = pick(q < 0.6 ? cumE : q < 0.75 ? cumD : cumU),
+            cx = idx % W,
+            cy = (idx / W) | 0;
+          var t = mode ? mode - 1 : (Math.random() * 4) | 0,
+            z = 1 + Math.random() * mxs,
+            R = Math.round,
+            v;
+          if (t === 0) {
+            v = [];
+            for (var i = 0; i < 6; i++)
+              v.push(R((i % 2 ? cy : cx) + (Math.random() * 2 - 1) * z));
+          } else if (t === 1) {
+            var w = z * (0.4 + Math.random() * 0.6),
+              h = z * (0.4 + Math.random() * 0.6);
+            v = [R(cx - w), R(cy - h), R(cx + w), R(cy + h)];
+          } else if (t === 2) {
+            v = [cx, cy, R(1 + z * Math.random()), R(1 + z * Math.random())];
+          } else {
+            var r = R(1 + z * Math.random() * 0.8);
+            v = [cx, cy, r, r];
+          }
+          return { t: t, v: v };
+        }
+        function mut(s) {
+          var v = s.v.slice(),
+            t = s.t;
+          var g = function () {
+            return (
+              Math.round(
+                (Math.random() + Math.random() + Math.random() - 1.5) * 8,
+              ) || 1
+            );
+          };
+          if (t === 0) {
+            v[(Math.random() * 6) | 0] += g();
+          } else if (t === 1) {
+            v[(Math.random() * 4) | 0] += g();
+          } else if (t === 2) {
+            v[(Math.random() * 4) | 0] += g();
+            v[2] = Math.max(1, v[2]);
+            v[3] = Math.max(1, v[3]);
+          } else {
+            if (Math.random() < 0.5) {
+              v[0] += g();
+              v[1] += g();
+            } else {
+              v[2] = v[3] = Math.max(1, v[2] + g());
+            }
+          }
+          return { t: t, v: v };
+        }
+
+        /* ---------- one step: anneal size, search, climb, keep the winner ---------- */
+        function step() {
+          var pr = shapes.length / N,
+            mxs =
+              Math.max(W, H) *
+              (pr < 0.12 ? 0.6 : pr < 0.4 ? 0.25 : pr < 0.75 ? 0.1 : 0.035);
+          cums(dirty);
+          dirty = false;
+          var top = [],
+            k,
+            j;
+          for (k = 0; k < 40; k++) {
+            var s0 = rnd(mxs);
+            top.push([ev(s0), s0]);
+          }
+          top.sort(function (a, b) {
+            return a[0] - b[0];
+          });
+          var bs = null,
+            bd = Infinity;
+          for (j = 0; j < 3; j++) {
+            var s = top[j][1],
+              d = top[j][0];
+            for (var a = 0; a < 28; a++) {
+              var m = mut(s),
+                dd = ev(m);
+              if (dd < d) {
+                s = m;
+                d = dd;
+              }
+            }
+            if (d < bd) {
+              bd = d;
+              bs = s;
+            }
+          }
+          if (bs && bd < 0) {
+            apply(bs);
+            fail = 0;
+          } else fail++;
+        }
+
+        function ui() {
+          var n = shapes.length;
+          $("#cnt").textContent = n + " / " + N;
+          $("#mat").textContent =
+            Math.max(
+              0,
+              Math.min(100, (1 - Math.sqrt(sumE / (W * H)) / rms0) * 100),
+            ).toFixed(0) + "%";
+          var sc = $("#scrub");
+          sc.max = n;
+          sc.value = viewK;
+        }
+        function tick() {
+          if (!running) return;
+          var t0 = performance.now();
+          acc += RATES[spd - 1];
+          while (
+            acc >= 1 &&
+            performance.now() - t0 < 14 &&
+            shapes.length < N &&
+            fail < 40
+          ) {
+            step();
+            acc -= 1;
+          }
+          acc = Math.min(acc, 1);
+          ui();
+          if (shapes.length >= N || fail >= 40) {
+            running = false;
+            $("#go").textContent = "Again";
+            return;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+
+        /* ---------- controls ---------- */
+        $("#go").onclick = function () {
+          if (running) {
+            running = false;
+            this.textContent = "Resume";
+            return;
+          }
+          if (shapes.length >= N || fail >= 40) reset();
+          if (viewK !== shapes.length) redraw(shapes.length);
+          running = true;
+          fail = 0;
+          acc = 1;
+          this.textContent = "Pause";
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(tick);
+        };
+        $("#reset").onclick = function () {
+          reset();
+        };
+        function restart() {
+          if (!src || stream) return;
+          reset();
+          $("#go").click();
+        }
+        $("#n").oninput = function () {
+          N = +this.value;
+          $("#nv").textContent = N;
+          ui();
+        };
+        $("#n").onchange = restart;
+        $("#spd").oninput = function () {
+          spd = +this.value;
+          $("#sv").textContent = spd;
+        };
+        $("#rev").oninput = function () {
+          org.style.clipPath = "inset(0 " + (100 - this.value) + "% 0 0)";
+        };
+        $("#scrub").oninput = function () {
+          running = false;
+          $("#go").textContent = "Resume";
+          redraw(Math.min(+this.value, shapes.length));
+        };
+        var mb = document.querySelectorAll("#modes button");
+        for (var mi = 0; mi < mb.length; mi++) {
+          mb[mi].onclick = function () {
+            mode = +this.dataset.m;
+            for (var q = 0; q < mb.length; q++)
+              mb[q].setAttribute(
+                "aria-pressed",
+                mb[q] === this ? "true" : "false",
+              );
+            restart();
+          };
+        }
+
+        /* ---------- twist: the focus brush ---------- */
+        $("#focus").onclick = function () {
+          focusOn = !focusOn;
+          this.setAttribute("aria-pressed", focusOn ? "true" : "false");
+          ov.classList.toggle("on", focusOn);
+          $("#hint").textContent = focusOn
+            ? "Paint on the picture. Blue areas get shapes first."
+            : "Tip: turn on Focus brush and paint over faces or eyes. Shapes go there first.";
+        };
+        $("#clr").onclick = function () {
+          brush.fill(0);
+          ox.clearRect(0, 0, ov.width, ov.height);
+          dirty = true;
+        };
+        function paint(e) {
+          var r = ov.getBoundingClientRect(),
+            x = ((e.clientX - r.left) / r.width) * W,
+            y = ((e.clientY - r.top) / r.height) * H,
+            R = Math.max(3, W * 0.07);
+          for (
+            var yy = Math.max(0, Math.floor(y - R));
+            yy <= Math.min(H - 1, Math.ceil(y + R));
+            yy++
+          ) {
+            for (
+              var xx = Math.max(0, Math.floor(x - R));
+              xx <= Math.min(W - 1, Math.ceil(x + R));
+              xx++
+            ) {
+              var d = Math.sqrt((xx - x) * (xx - x) + (yy - y) * (yy - y));
+              if (d < R) {
+                var p = yy * W + xx;
+                brush[p] = Math.min(1, brush[p] + 0.35 * (1 - d / R));
+              }
+            }
+          }
+          var gr = ox.createRadialGradient(
+            x * S,
+            y * S,
+            0,
+            x * S,
+            y * S,
+            R * S,
+          );
+          gr.addColorStop(0, "rgba(41,151,255,.35)");
+          gr.addColorStop(1, "rgba(41,151,255,0)");
+          ox.fillStyle = gr;
+          ox.beginPath();
+          ox.arc(x * S, y * S, R * S, 0, 6.2832);
+          ox.fill();
+          dirty = true;
+        }
+        ov.addEventListener("pointerdown", function (e) {
+          if (!focusOn) return;
+          painting = true;
+          try {
+            ov.setPointerCapture(e.pointerId);
+          } catch (x) {}
+          paint(e);
+        });
+        ov.addEventListener("pointermove", function (e) {
+          if (painting) paint(e);
+        });
+        ov.addEventListener("pointerup", function () {
+          painting = false;
+        });
+        ov.addEventListener("pointercancel", function () {
+          painting = false;
+        });
+
+        /* ---------- sources: sample, upload, camera ---------- */
+        function sample() {
+          var c = document.createElement("canvas");
+          c.width = 640;
+          c.height = 480;
+          var x = c.getContext("2d");
+          var g = x.createLinearGradient(0, 0, 0, 360);
+          g.addColorStop(0, "#1b2a5e");
+          g.addColorStop(0.55, "#b5527a");
+          g.addColorStop(1, "#ffb36b");
+          x.fillStyle = g;
+          x.fillRect(0, 0, 640, 480);
+          x.fillStyle = "rgba(255,255,255,.85)";
+          [
+            [60, 40],
+            [150, 90],
+            [240, 30],
+            [330, 70],
+            [560, 50],
+            [600, 120],
+            [90, 140],
+            [500, 20],
+          ].forEach(function (p) {
+            x.fillRect(p[0], p[1], 2, 2);
+          });
+          x.fillStyle = "#ffe9b0";
+          x.beginPath();
+          x.arc(430, 250, 66, 0, 7);
+          x.fill();
+          x.fillStyle = "#4a3263";
+          x.beginPath();
+          x.moveTo(0, 360);
+          x.lineTo(110, 200);
+          x.lineTo(230, 320);
+          x.lineTo(340, 230);
+          x.lineTo(480, 340);
+          x.lineTo(570, 260);
+          x.lineTo(640, 330);
+          x.lineTo(640, 360);
+          x.closePath();
+          x.fill();
+          x.fillStyle = "#21183b";
+          x.beginPath();
+          x.moveTo(0, 370);
+          x.lineTo(150, 270);
+          x.lineTo(300, 365);
+          x.lineTo(470, 295);
+          x.lineTo(640, 370);
+          x.lineTo(640, 360);
+          x.lineTo(0, 360);
+          x.closePath();
+          x.fill();
+          var lk = x.createLinearGradient(0, 360, 0, 480);
+          lk.addColorStop(0, "#3a2a62");
+          lk.addColorStop(1, "#0c0919");
+          x.fillStyle = lk;
+          x.fillRect(0, 360, 640, 120);
+          x.fillStyle = "rgba(255,233,176,.5)";
+          x.fillRect(380, 366, 100, 7);
+          x.fillRect(398, 382, 64, 6);
+          x.fillRect(414, 396, 32, 5);
+          load(c);
+        }
+        $("#smp").onclick = function () {
+          stopCam();
+          sample();
+        };
+        $("#up").onclick = function () {
+          $("#file").click();
+        };
+        $("#file").onchange = function () {
+          var f = this.files && this.files[0];
+          if (!f) return;
+          stopCam();
+          var im = new Image();
+          im.onload = function () {
+            load(im);
+            URL.revokeObjectURL(im.src);
+          };
+          im.src = URL.createObjectURL(f);
+          this.value = "";
+        };
+        function stopCam() {
+          if (stream) {
+            stream.getTracks().forEach(function (t) {
+              t.stop();
+            });
+            stream = null;
+          }
+          vid.hidden = true;
+          vid.srcObject = null;
+          $("#cam").textContent = "Camera";
+        }
+        $("#cam").onclick = function () {
+          if (stream) {
+            var d0 = dims(vid),
+              cv = document.createElement("canvas");
+            cv.width = d0[0];
+            cv.height = d0[1];
+            var cx = cv.getContext("2d");
+            cx.translate(cv.width, 0);
+            cx.scale(-1, 1);
+            cx.drawImage(vid, 0, 0);
+            stopCam();
+            load(cv);
+            setTimeout(function () {
+              $("#go").click();
+            }, 300);
+            return;
+          }
+          var btn = this;
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            $("#hint").textContent =
+              "Camera is not available here. Upload a photo instead.";
+            return;
+          }
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "user" } })
+            .then(function (s) {
+              running = false;
+              stream = s;
+              vid.srcObject = s;
+              vid.hidden = false;
+              return vid.play().then(function () {
+                btn.textContent = "Capture";
+                $("#hint").textContent =
+                  "Smile. Press Capture and watch yourself become shapes.";
+              });
+            })
+            .catch(function () {
+              $("#hint").textContent =
+                "Camera is not available here. Upload a photo instead.";
+            });
+        };
+
+        /* ---------- exports ---------- */
+        function save(name, blob) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () {
+            URL.revokeObjectURL(a.href);
+          }, 2000);
+        }
+        function hx(c) {
+          return (
+            "#" +
+            c
+              .map(function (v) {
+                return ("0" + v.toString(16)).slice(-2);
+              })
+              .join("")
+          );
+        }
+        function q1(n) {
+          return +n.toFixed(1);
+        }
+        $("#svg").onclick = function () {
+          var o =
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' +
+            src.width +
+            " " +
+            src.height +
+            '"><rect width="100%" height="100%" fill="' +
+            hx(bg) +
+            '"/>';
+          shapes.forEach(function (s) {
+            var v = s.v,
+              f = 'fill="' + hx(s.c) + '" fill-opacity="' + A + '"';
+            if (s.t === 0) {
+              o +=
+                '<polygon points="' +
+                [0, 1, 2]
+                  .map(function (i) {
+                    return (
+                      q1((v[i * 2] + 0.5) * S) +
+                      "," +
+                      q1((v[i * 2 + 1] + 0.5) * S)
+                    );
+                  })
+                  .join(" ") +
+                '" ' +
+                f +
+                "/>";
+            } else if (s.t === 1) {
+              var x0 = Math.min(v[0], v[2]),
+                x1 = Math.max(v[0], v[2]),
+                y0 = Math.min(v[1], v[3]),
+                y1 = Math.max(v[1], v[3]);
+              o +=
+                '<rect x="' +
+                q1(x0 * S) +
+                '" y="' +
+                q1(y0 * S) +
+                '" width="' +
+                q1((x1 - x0 + 1) * S) +
+                '" height="' +
+                q1((y1 - y0 + 1) * S) +
+                '" ' +
+                f +
+                "/>";
+            } else {
+              o +=
+                '<ellipse cx="' +
+                q1((v[0] + 0.5) * S) +
+                '" cy="' +
+                q1((v[1] + 0.5) * S) +
+                '" rx="' +
+                q1((v[2] + 0.5) * S) +
+                '" ry="' +
+                q1((v[3] + 0.5) * S) +
+                '" ' +
+                f +
+                "/>";
+            }
+          });
+          save(
+            "primitive.svg",
+            new Blob([o + "</svg>"], { type: "image/svg+xml" }),
+          );
+        };
+        $("#png").onclick = function () {
+          stage.toBlob(function (b) {
+            if (b) save("primitive.png", b);
+          });
+        };
+
+        /* ---------- scroll reveals ---------- */
+        var rv = document.querySelectorAll(".rv");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(
+            function (es) {
+              es.forEach(function (e) {
+                if (e.isIntersecting) {
+                  e.target.classList.add("in");
+                  io.unobserve(e.target);
+                }
+              });
+            },
+            { threshold: 0.12 },
+          );
+          rv.forEach(function (el) {
+            io.observe(el);
+          });
+        } else {
+          rv.forEach(function (el) {
+            el.classList.add("in");
+          });
+        }
+
+        sample();
+        setTimeout(function () {
+          $("#go").click();
+        }, 700);
+      })();
+    </script>
+  </body>
+</html>
